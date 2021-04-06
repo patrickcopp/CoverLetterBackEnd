@@ -1,0 +1,4 @@
+let EMAIL_VERIFICATION_FAILURE = "email.verification.failed";
+let PASSWORD_VERIFICATION_FAILURE = "password.verification.failed";
+let SALT = "PASSWORDSALT";
+module.exports = { EMAIL_VERIFICATION_FAILURE, PASSWORD_VERIFICATION_FAILURE, SALT };
