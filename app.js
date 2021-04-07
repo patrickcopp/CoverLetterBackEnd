@@ -1,12 +1,15 @@
 const express = require('express')
+const coookies = require('cookie-parser')
 const app = express()
 const port = 3000
 bodyParser = require('body-parser');
 const util = require('./util/users');
 const config = require('./util/config');
 const db = require('./util/db_util');
+const cookieParser = require('cookie-parser');
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 
 app.listen(port, () => {
@@ -27,7 +30,7 @@ app.post('/register', async (req, res) => {
         return res.status(403).send(JSON.stringify({statusMessage: config.ACCOUNT_ALREADY_EXISTS}));
     await db.register(req.body.email, req.body.password);
     res.send();
-});
+}); 
 
 app.post('/login', async (req, res) => {
     res.setHeader('content-type', 'text/JSON');
@@ -36,7 +39,12 @@ app.post('/login', async (req, res) => {
     
     rows = await db.loginCheck(req.body.email, req.body.password);
 
-    if (rows.length != 0)
+    if (rows.length != 1)
         return res.status(403).send(JSON.stringify({statusMessage: config.LOGIN_FAILED}));
-    res.send();
+    
+    userCookie = util.generateUUID();
+    await db.saveCookie(rows[0]['UserID'], userCookie);
+    res.cookie('login',userCookie);
+
+    return res.send(JSON.stringify({statusMessage: config.LOGIN_SUCCESSFUL}));
 });
