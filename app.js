@@ -53,6 +53,21 @@ app.post('/test', async (req, res) => {
     res.send(JSON.stringify(await loggedIn(req.cookies)));
 });
 
+app.post('/paragraph', async (req, res) => {
+    if (!loggedIn(req.cookies))
+        return res.send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
+    await db.saveParagraph(req.cookies.userID, req.body.paragraph);
+    res.send();
+});
+
+app.get('/paragraph', async (req, res) => {
+    if (!loggedIn(req.cookies))
+        return res.send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
+    
+    paragraphs = await db.getParagraphs(req.cookies.userID);
+    res.send(JSON.stringify(paragraphs));
+});
+
 async function loggedIn(cookies){
     if(cookies===undefined || cookies['userID']===undefined || cookies['login']===undefined)
         return false;

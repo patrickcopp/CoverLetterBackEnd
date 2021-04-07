@@ -32,6 +32,15 @@ async function cookieCheck(userID, cookie){
     return rows;
 }
 
+async function saveParagraph(userID, paragraph){
+    await pool.execute("INSERT INTO Paragraphs (UserID, Paragraph) VALUES (?,?)",[userID, paragraph]);
+}
+
+async function getParagraphs(userID){
+    const [rows, fields] = await pool.execute("SELECT ParaID as ID, Paragraph FROM Paragraphs WHERE UserID = ?",[userID]);
+    return rows;
+}
+
 function encryptPassword(password){
     return shajs('sha256').update(password).digest('hex');
 }
@@ -42,5 +51,7 @@ module.exports = {
     register,
     loginCheck,
     saveCookie,
-    cookieCheck
+    cookieCheck,
+    saveParagraph,
+    getParagraphs
 };
