@@ -1,5 +1,4 @@
 const express = require('express')
-const coookies = require('cookie-parser')
 const app = express()
 const port = 3000
 bodyParser = require('body-parser');
@@ -45,6 +44,17 @@ app.post('/login', async (req, res) => {
     userCookie = util.generateUUID();
     await db.saveCookie(rows[0]['UserID'], userCookie);
     res.cookie('login',userCookie);
+    res.cookie('userID',rows[0]['UserID'])
 
     return res.send(JSON.stringify({statusMessage: config.LOGIN_SUCCESSFUL}));
 });
+
+app.post('/test', async (req, res) => {
+    res.send(JSON.stringify(await loggedIn(req.cookies)));
+});
+
+async function loggedIn(cookies){
+    if(cookies===undefined || cookies['userID']===undefined || cookies['login']===undefined)
+        return false;
+    return await util.cookieLogin(cookies['userID'], cookies['login']);
+}

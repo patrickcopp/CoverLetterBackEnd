@@ -1,5 +1,7 @@
-const shajs = require('sha.js');
 const {v4: uuidv4} = require('uuid');
+const db = require('./db_util');
+const config = require('./config');
+
 function emailValidator(email){
     return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email);
 }
@@ -8,17 +10,23 @@ function passwordValidator(password){
     return password.length == 32;
 }
 
-function encryptPassword(password){
-    return shajs('sha256').update(password).digest('hex');
-}
-
 function generateUUID(){
     return uuidv4();
+}
+
+async function cookieLogin(userID, loginCookie){
+    rows = await db.cookieCheck(userID, loginCookie);
+    if (rows.length != 1){
+        return false;
+    }
+    date = new Date(rows[0]['Created'])
+    date.setTime(date.getTime()+ (config.LOGIN_HOURS*60*60*1000));
+    return new Date < date;
 }
 
 module.exports = { 
     emailValidator,
     passwordValidator,
-    encryptPassword,
-    generateUUID
- };
+    generateUUID,
+    cookieLogin
+};

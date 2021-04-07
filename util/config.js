@@ -6,6 +6,7 @@ let ACCOUNT_ALREADY_EXISTS = "account.already.exists";
 let LOGIN_FAILED = "login.failed";
 let LOGIN_SUCCESSFUL = "login.successful";
 let SALT = process.env.SALT;
+let LOGIN_HOURS = 4;
 
 module.exports = { 
     EMAIL_VERIFICATION_FAILURE,
@@ -13,5 +14,6 @@ module.exports = {
     ACCOUNT_ALREADY_EXISTS,
     LOGIN_FAILED,
     LOGIN_SUCCESSFUL,
+    LOGIN_HOURS,
     SALT
 };
