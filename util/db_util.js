@@ -33,12 +33,19 @@ async function cookieCheck(userID, cookie){
 }
 
 async function saveParagraph(userID, paragraph){
-    await pool.execute("INSERT INTO Paragraphs (UserID, Paragraph) VALUES (?,?)",[userID, paragraph]);
+    const [rows, fields] = await pool.execute("INSERT INTO Paragraphs (UserID, Paragraph) VALUES (?,?)",[userID, paragraph]);
+    return rows.affectedRows == 1;
 }
 
 async function getParagraphs(userID){
     const [rows, fields] = await pool.execute("SELECT ParaID as ID, Paragraph FROM Paragraphs WHERE UserID = ?",[userID]);
     return rows;
+}
+
+async function updateParagraph(userID, paragraph, ID){
+    console.log(userID+" "+paragraph+" "+ID)
+    const rows = await pool.execute("Update Paragraphs SET Paragraph = ? WHERE ParaID = ? AND UserID = ?",[paragraph, ID, userID]);
+    return rows.affectedRows == 1;
 }
 
 function encryptPassword(password){
@@ -53,5 +60,6 @@ module.exports = {
     saveCookie,
     cookieCheck,
     saveParagraph,
-    getParagraphs
+    getParagraphs,
+    updateParagraph
 };

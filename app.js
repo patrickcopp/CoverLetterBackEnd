@@ -54,15 +54,24 @@ app.post('/test', async (req, res) => {
 });
 
 app.post('/paragraph', async (req, res) => {
+    res.setHeader('content-type', 'text/JSON');
     if (!loggedIn(req.cookies))
-        return res.send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
-    await db.saveParagraph(req.cookies.userID, req.body.paragraph);
+        return res.status(403).send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
+    if(req.body.paragraph === undefined)
+        return res.status(404).send(JSON.stringify({statusMessage: config.INVALID_REQUEST}));
+
+    if (req.body.ID !== undefined)
+        if (!await db.updateParagraph(req.cookies.userID, req.body.paragraph, req.body.ID))
+            return res.status(403).send(JSON.stringify({statusMessage: config.FORBIDDEN_REQUEST}));
+    else
+        await db.saveParagraph(req.cookies.userID, req.body.paragraph);
     res.send();
 });
 
 app.get('/paragraph', async (req, res) => {
+    res.setHeader('content-type', 'text/JSON');
     if (!loggedIn(req.cookies))
-        return res.send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
+        return res.status(404).send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
     
     paragraphs = await db.getParagraphs(req.cookies.userID);
     res.send(JSON.stringify(paragraphs));
