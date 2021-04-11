@@ -10,18 +10,19 @@ const cookieParser = require('cookie-parser');
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+db.createTables().then(() =>
+    app.listen(port, () => {
+        console.log(`Example app listening at http://localhost:${port}`)
+    })
+);
 
-app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
-    db.createTables();
-});
 
 
 
 app.post('/register', async (req, res) => {
     res.setHeader('content-type', 'text/JSON');
     if (!util.emailValidator(req.body.email))
-        return res.status(400).send(400, JSON.stringify({statusMessage: config.EMAIL_VERIFICATION_FAILURE}));
+        return res.status(400).send(JSON.stringify({statusMessage: config.EMAIL_VERIFICATION_FAILURE}));
     if (!util.passwordValidator(req.body.password))
         return res.status(400).send(JSON.stringify({statusMessage: config.PASSWORD_VERIFICATION_FAILURE}));
     rows = await db.retrieveUsers(req.body.email);
@@ -57,7 +58,7 @@ app.post('/paragraph', async (req, res) => {
     res.setHeader('content-type', 'text/JSON');
     if (!loggedIn(req.cookies))
         return res.status(403).send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
-    if(req.body.paragraph === undefined)
+    if(req.body.paragraph === undefined || req.body.paragraph.length > 2047)
         return res.status(404).send(JSON.stringify({statusMessage: config.INVALID_REQUEST}));
 
     if (req.body.ID !== undefined)

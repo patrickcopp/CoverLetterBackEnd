@@ -3,11 +3,11 @@ const db = require('./db_util');
 const config = require('./config');
 
 function emailValidator(email){
-    return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email);
+    return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email) && email.length < 50;
 }
 
 function passwordValidator(password){
-    return password.length == 32;
+    return password.length < 50 && password.length > 7;
 }
 
 function generateUUID(){
