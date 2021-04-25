@@ -56,14 +56,15 @@ app.post('/test', async (req, res) => {
 
 app.post('/paragraph', async (req, res) => {
     res.setHeader('content-type', 'text/JSON');
-    if (!loggedIn(req.cookies))
+    if (!await loggedIn(req.cookies))
         return res.status(403).send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
-    if(req.body.paragraph === undefined || req.body.paragraph.length > 2047)
+    if(req.body.paragraph == undefined || req.body.paragraph.length > 2047)
         return res.status(404).send(JSON.stringify({statusMessage: config.INVALID_REQUEST}));
 
-    if (req.body.ID !== undefined)
+    if (req.body.ID != undefined){
         if (!await db.updateParagraph(req.cookies.userID, req.body.paragraph, req.body.ID))
             return res.status(403).send(JSON.stringify({statusMessage: config.FORBIDDEN_REQUEST}));
+    }
     else
         await db.saveParagraph(req.cookies.userID, req.body.paragraph);
     res.send();
@@ -71,15 +72,29 @@ app.post('/paragraph', async (req, res) => {
 
 app.get('/paragraph', async (req, res) => {
     res.setHeader('content-type', 'text/JSON');
-    if (!loggedIn(req.cookies))
-        return res.status(404).send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
+    if (!await loggedIn(req.cookies))
+        return res.status(403).send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
     
     paragraphs = await db.getParagraphs(req.cookies.userID);
     res.send(JSON.stringify(paragraphs));
 });
 
+app.post('/tags', async (req, res) => {
+    res.setHeader('content-type', 'text/JSON');
+    if (!await loggedIn(req.cookies))
+        return res.status(403).send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
+    if(req.body.paragraphID == undefined || req.body.tags == undefined)
+        return res.status(404).send(JSON.stringify({statusMessage: config.INVALID_REQUEST}));
+    if (req.body.tags.length > 30)
+        return res.status(404).send(JSON.stringify({statusMessage: config.TOO_MANY_TAGS}));
+    if (!await db.updateTags(req.cookies.userID, req.body.paragraphID, req.body.tags))
+        return res.status(403).send(JSON.stringify({statusMessage: config.FORBIDDEN_REQUEST}));
+
+    res.send();
+});
+
 async function loggedIn(cookies){
-    if(cookies===undefined || cookies['userID']===undefined || cookies['login']===undefined)
+    if(cookies==undefined || cookies['userID']==undefined || cookies['login']==undefined)
         return false;
     return await util.cookieLogin(cookies['userID'], cookies['login']);
 }

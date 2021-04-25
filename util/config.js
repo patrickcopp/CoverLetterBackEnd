@@ -8,6 +8,8 @@ let LOGIN_SUCCESSFUL = "login.successful";
 let NOT_LOGGED_IN = 'not.logged.in';
 let INVALID_REQUEST = 'invalid.request';
 let FORBIDDEN_REQUEST = 'forbidden.request';
+let TOO_MANY_TAGS = 'too.many.tags';
+
 
 let SALT = process.env.SALT;
 let LOGIN_HOURS = 4;
@@ -22,5 +24,6 @@ module.exports = {
     NOT_LOGGED_IN,
     INVALID_REQUEST,
     FORBIDDEN_REQUEST,
-    SALT
+    SALT,
+    TOO_MANY_TAGS
 };

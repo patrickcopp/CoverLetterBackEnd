@@ -45,8 +45,31 @@ async function getParagraphs(userID){
 async function updateParagraph(userID, paragraph, ID){
     console.log(userID+" "+paragraph+" "+ID)
     const rows = await pool.query("Update Paragraphs SET Paragraph = ? WHERE ParaID = ? AND UserID = ?",[paragraph, ID, userID]);
-    return rows.affectedRows == 1;
+    return rows[0].affectedRows == 1;
 }
+
+async function updateTags(userID, paragraphID, tags){
+    if(!await paragraphBelongsTo(userID,paragraphID))
+        return false;
+    await deleteTags(userID, paragraphID);
+    tagsAndIDs = [];
+    tags.forEach(element => {
+        tagsAndIDs.push([paragraphID,element])
+    });
+    if (tags.length > 0)
+        await pool.query("INSERT INTO Tags (ParaID,Tag) VALUES ?",[tagsAndIDs]);
+    return true;
+}
+
+async function paragraphBelongsTo(userID, paragraphID){
+    const [rows, fields] = await pool.query("SELECT COUNT(*) FROM Paragraphs WHERE ParaID = ? AND UserID = ?",[paragraphID,userID]);
+    return rows[0]["COUNT(*)"] == 1;
+}
+
+async function deleteTags(userID, paragraphID){
+    await pool.query("DELETE FROM Tags WHERE ParaID = ?",[paragraphID]);
+}
+
 
 function encryptPassword(password){
     return shajs('sha256').update(password).digest('hex');
@@ -61,5 +84,6 @@ module.exports = {
     cookieCheck,
     saveParagraph,
     getParagraphs,
-    updateParagraph
+    updateParagraph,
+    updateTags
 };
