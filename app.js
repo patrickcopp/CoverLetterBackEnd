@@ -6,6 +6,9 @@ const util = require('./util/users');
 const config = require('./util/config');
 const db = require('./util/db_util');
 const cookieParser = require('cookie-parser');
+const fs = require('fs')
+const path = require('path')
+
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -35,7 +38,7 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
     res.setHeader('content-type', 'text/JSON');
     if (!util.emailValidator(req.body.email))
-        return res.status(400).send(400, JSON.stringify({statusMessage: config.EMAIL_VERIFICATION_FAILURE}));
+        return res.status(400).send(JSON.stringify({statusMessage: config.EMAIL_VERIFICATION_FAILURE}));
     
     rows = await db.loginCheck(req.body.email, req.body.password);
 
@@ -48,10 +51,6 @@ app.post('/login', async (req, res) => {
     res.cookie('userID',rows[0]['UserID'])
 
     return res.send(JSON.stringify({statusMessage: config.LOGIN_SUCCESSFUL}));
-});
-
-app.post('/test', async (req, res) => {
-    res.send(JSON.stringify(await loggedIn(req.cookies)));
 });
 
 app.post('/paragraph', async (req, res) => {
@@ -92,6 +91,50 @@ app.post('/tags', async (req, res) => {
 
     res.send();
 });
+
+app.use( express.static( path.resolve( __dirname, "../public" ) ) );
+
+
+app.get('/', async (req, res) =>{
+    if (! await loggedIn(req.cookies))
+        return res.status(403).send(JSON.stringify({statusMessage: config.NOT_LOGGED_IN}));
+    fs.readFile(path.resolve('./public/index.html'), 'utf-8', (err,data) => {
+        if(err){
+            console.log(err);
+            return res.status(500).send("Something bad happened :(")
+        }
+        return res.send(data);
+    });
+})
+app.get('/style.css',function(req, res){
+    res.sendFile(path.join('./public/style.css'));
+});
+  
+app.get('/index.js',function(req, res){
+    fs.readFile(path.join('./public/index.js'), 'utf8', function(err, data) {
+      res.contentType('application/javascript');
+      res.send(data);
+    });
+});
+
+app.get('/login', (req, res) => {
+    fs.readFile(path.resolve('./public/login.html'), 'utf-8', (err,data) => {
+        if(err){
+            console.log(err);
+            return res.status(500).send("Something bad happened :(")
+        }
+        return res.send(data);
+    });
+});
+
+app.get('/login.js',function(req, res){
+    fs.readFile(path.join('./public/login.js'), 'utf8', function(err, data) {
+      res.contentType('application/javascript');
+      res.send(data);
+    });
+});
+
+
 
 async function loggedIn(cookies){
     if(cookies==undefined || cookies['userID']==undefined || cookies['login']==undefined)

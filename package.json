@@ -19,9 +19,11 @@
   "dependencies": {
     "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",
+    "esm": "^3.2.25",
     "express": "^4.17.1",
     "mysql2": "^2.2.5",
+    "react": "^17.0.2",
     "sha.js": "^2.4.11",
-    "uuid": "^8.3.2"
+    "uuidv4": "^6.2.7"
   }
 }
